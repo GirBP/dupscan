@@ -213,6 +213,8 @@ def test_big_file_hash_identical_single_vs_multithread(tmp_path, monkeypatch):
 def test_adaptive_blake3_budget_and_large_file_progress(
         tmp_path, monkeypatch):
     monkeypatch.setattr(core.os, "cpu_count", lambda: 8)
+    # WORKERS рахується під час імпорту з реальної кількості ядер машини
+    monkeypatch.setattr(core, "WORKERS", 8)
     monkeypatch.setattr(core, "BIG", 1024)
     monkeypatch.setattr(core, "BIG_CHUNK", 256 * 1024)
     assert core._blake3_threads(2048, True, 1) == 8
