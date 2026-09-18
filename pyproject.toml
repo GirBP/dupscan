@@ -1,0 +1,73 @@
+[build-system]
+requires = ["setuptools>=80"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dupscan"
+version = "2.26.0"
+description = "Safe duplicate file and directory scanner for macOS"
+requires-python = ">=3.12,<3.15"
+dependencies = [
+    "PySide6>=6.11,<7",
+    "blake3>=1.0,<2",
+    "ijson>=3.5,<4",
+    "Send2Trash>=2.1,<3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=2.3,<3",
+    "pyinstaller>=6.21,<7",
+    "pytest>=9,<10",
+    "ruff>=0.15,<1",
+]
+
+[project.scripts]
+dupscan = "dupscan.__main__:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+
+# Прагматичний mypy: ловити реальні розриви контракту (клас розірвано навпіл
+# і подібне — ruff і тести самі такого не ловлять), не перетипізувати
+# 15k рядків. strict свідомо НЕ увімкнено.
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+check_untyped_defs = true
+
+# ДВА точкові, задокументовані виключення — не рядкові # type: ignore через
+# обсяг (>150 випадків одного відомого кореня в кожному), кожне зведено до
+# ОДНІЄЇ конкретної помилки в ДВОХ конкретних модулях, лишень ПІСЛЯ ручної
+# перевірки, що жодного справжнього розриву під ними не ховається:
+#   attr-defined (app.py, table_models.py) — PySide6-стаби експонують лише
+#     СКОПОВАНІ імена enum (Qt.ItemDataRole.UserRole), а увесь застосунок
+#     послідовно використовує старий короткий синтаксис (Qt.UserRole) —
+#     той самий об'єкт існує в рантаймі через сумісність PySide6, стаби
+#     просто не описують псевдонім. Це 163 з 265 початкових помилок.
+#   func-returns-value (app.py) — ідіома "(побічна_дія(), інша_дія())" у
+#     Qt-лямбдах на .connect(...): виклики None-функцій навмисно
+#     викликаються заради побічного ефекту всередині tuple-виразу, бо
+#     лямбда не може містити оператори. Кожен із 16 випадків прочитано
+#     вручну — жоден не є помилковим використанням значення, що повертається.
+[[tool.mypy.overrides]]
+module = ["dupscan.ui.app"]
+disable_error_code = ["attr-defined", "func-returns-value"]
+
+[[tool.mypy.overrides]]
+module = ["dupscan.ui.table_models"]
+disable_error_code = ["attr-defined"]
