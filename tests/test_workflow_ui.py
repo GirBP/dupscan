@@ -98,7 +98,7 @@ def test_operation_controls_are_global_and_only_visible_while_busy():
 
     main._set_operation_controls_visible(False)
     assert main.operation_controls.isHidden()
-    # 2.16: місце банера зарезервоване завжди (layout не смикається),
+    # Місце банера зарезервоване завжди (layout не смикається),
     # тому «неактивний» стан — прозорий банер без тексту, не isHidden.
     assert main.results_operation_banner.property("active") == "false"
     assert main.results_operation_text.text() == ""
