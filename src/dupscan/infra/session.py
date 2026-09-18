@@ -640,7 +640,7 @@ def _validate_payload(data: object) -> dict:
     file_class = _dict(state.get("file_class", {}), "file_class")
     class_size = _dict(state.get("class_size", {}), "class_size")
     # v3 не зберігає похідні class_paths/dir_files (відновлюються при
-    # завантаженні); для v1/v2 їх відсутність — помилка, як і раніше.
+    # завантаженні); у v1/v2 їх відсутність лишається помилкою.
     derived_optional = data.get("version") == 3
     class_paths_raw = state.get("class_paths")
     dir_files_raw = state.get("dir_files")
@@ -743,9 +743,8 @@ def _validate_payload(data: object) -> dict:
             raise ValueError(f"тека поза коренями сесії: {d}")
         if not isinstance(ok, bool):
             raise ValueError("некоректний dir_ok")
-    # Опціональний розділ: старі сесії (v1/v2 і v3 до цього хотфіксу) не
-    # мають dir_read_failed — порожній список за замовчуванням лишається
-    # коректним.
+    # Опціональний розділ: старі сесії (v1/v2/v3) не мають dir_read_failed —
+    # порожній список за замовчуванням лишається коректним.
     dir_read_failed = state.get("dir_read_failed", [])
     if not isinstance(dir_read_failed, list) or len(dir_read_failed) > _MAX_STATE_ITEMS:
         raise ValueError("некоректний dir_read_failed")

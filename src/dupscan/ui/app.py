@@ -176,10 +176,8 @@ def _namefix_status_text(outcome: str, detail: str) -> str:
 def _move_result_message(moved_count: int, errors: list[str]) -> str:
     """Чесний підсумок часткового переносу для попапа злиття.
 
-    Раніше текст безумовно закінчувався «Решту перенесено», навіть коли не
-    перенеслось нічого (moved_count == 0) — цифра реально перенесених у
-    попап не потрапляла зовсім. Тепер вона є завжди, а фрази про «решту»
-    немає.
+    Кількість реально перенесених файлів показана завжди, навіть коли
+    вона нульова; фрази «Решту перенесено» немає.
     """
     head = (
         f"Перенесено {moved_count} файл(ів), не перенесено {len(errors)}."
@@ -211,7 +209,7 @@ def quick_look(path: str) -> None:
     )
 
 
-# ---- воркери й помічники рескану: винесено у workers.py (2.17 «Solid Core») ----
+# ---- воркери й помічники рескану (workers.py) -------------------------------
 from dupscan.ui.workers import (  # noqa: E402 — міст модулів
     Bg, DirectoryTrashWorker, MergePreparationWorker,
     MergeTransferWorker, PairVerificationWorker, PerceptualScanWorker,
@@ -451,7 +449,7 @@ def session_probe_specs(
     return specs
 
 
-# ---- файлові операції: винесено у fsops.py (2.17 «Solid Core») -------------
+# ---- файлові операції (fsops.py) --------------------------------------------
 # Реекспорти зберігають публічні імена модуля app для Main, воркерів і
 # тестів. Обгортки нижче читають to_trash/_verified_survivor із глобалів
 # app при КОЖНОМУ виклику, тому підміна app.to_trash (тести, інтеграції)
@@ -538,11 +536,10 @@ class ElidingLabel(QLabel):
 
 
 class ProgressLimiter:
-    """ЄДИНИЙ обмежувач частоти оновлень прогресу.
+    """Єдиний обмежувач частоти оновлень прогресу.
 
-    Раніше гейт обходився щоразу, коли змінювалася фаза, а фаза містила шлях
-    поточного файла — тобто на кожному файлі. Тепер швидкість оновлень не
-    залежить від кількості файлів.
+    Гейт не обходиться зміною фази: фаза містить шлях поточного файла,
+    тому швидкість оновлень не залежить від кількості файлів.
     """
 
     def __init__(self, sink, interval: float = 0.1):
@@ -2505,9 +2502,9 @@ QFrame#resultsOperationBanner {
         else:
             # «Кластери тек» (3) і «Схожі
             # фото (підказка)» (4) — структурно read-only, немає .checked.
-            # Раніше цей else-catchall трактував БУДЬ-ЯКИЙ index>=2 як
-            # вкладку подібності (index==2) — з новими вкладками це б хибно
-            # показувало позначки з подібності на вкладках, де їх нема.
+            # Трактування будь-якого index>=2 як вкладки подібності
+            # (index==2) хибно показало б позначки з подібності на цих
+            # вкладках, де їх нема.
             selected = set()
             total = 0
             groups_count = 0
@@ -3689,9 +3686,9 @@ QFrame#resultsOperationBanner {
         edit.setAccessibleName("Пошук у результатах")
         view = self._model_views.get(model)
         # _search_box може відпрацювати до реєстрації моделі
-        # у _model_views (view лишається None) — раніше поведінка та сама
-        # (dict.get(None, ...) з ключем-не-QTreeView просто не знаходив
-        # нічого і падав на дефолт), тепер це явно типобезпечно.
+        # у _model_views (view лишається None): dict.get(None, ...) не
+        # знаходить нічого і падає на дефолт, тут це записано явно й
+        # типобезпечно, без покладання на None-як-ключ.
         name = self._view_names.get(view, "results") if view is not None else "results"
         saved = str(self._settings.value(f"views/{name}/query", ""))
         if len(saved) > 4096:
@@ -4565,9 +4562,9 @@ QFrame#resultsOperationBanner {
         menu = QMenu(view)
         if path:
             res = self.result
-            # D6: historical/partial groups get an honest "Перевірити й…"
-            # workaround (fresh proof of exactly this group) instead of a
-            # blanket refusal — mirrors _sim_menu's needs_pair_check.
+            # Для historical/partial груп — «Перевірити й…» зі свіжим
+            # доказом рівно цієї групи, замість суцільної відмови;
+            # дзеркалить needs_pair_check у _sim_menu.
             needs_group_check = bool(res and (not res.live or res.partial))
             if needs_group_check:
                 menu.addAction(
@@ -6238,10 +6235,9 @@ QFrame#resultsOperationBanner {
             stale: list[str] = []
             for p in paths:
                 try:
-                    # safe тепер явний bool, як у сестринських
-                    # _fresh_group_verify (5521, 5676) — раніше safe отримував
-                    # напряму stat_result | None (truthy-перевірка спрацьовувала,
-                    # але "safe = False" у except конфліктувало з типом mypy).
+                    # safe — явний bool, як у сестринських _fresh_group_verify,
+                    # а не stat_result | None напряму: узгоджується з
+                    # "safe = False" у except-гілці нижче.
                     victim_stat = _verified_survivor(res, p, removal)
                     safe = victim_stat is not None
                 except OSError:
@@ -6263,10 +6259,10 @@ QFrame#resultsOperationBanner {
             if not victims:
                 self.status.setText("Нічого безпечно видаляти.")
                 return
-            # file_class.get(path) дає str | None; None-ключ
-            # ніколи не збігається зі справжнім class_id, тож .get(None, ())
-            # і раніше безпечно давав () — тепер це явно, без покладання на
-            # None-як-ключ.
+            # file_class.get(path) дає str | None; None-ключ ніколи не
+            # збігається зі справжнім class_id, тому .get(None, ()) завжди
+            # дає () — це записано явно у walrus-перевірці, без покладання
+            # на None-як-ключ.
             review_groups = [
                 list(res.class_paths.get(class_id, ()))
                 if (class_id := res.file_class.get(path)) is not None else []
@@ -6795,8 +6791,7 @@ QFrame#resultsOperationBanner {
                 sample += f"\n… і ще {len(unproven) - 10}"
             if os.environ.get("QT_QPA_PLATFORM") == "offscreen":
                 # Тести мокають QMessageBox.warning, не конструктор:
-                # сирий exec() тут ВІШАВ увесь прогін (та сама пастка,
-                # що ловилась раніше). Кнопка звіту —
+                # сирий exec() тут вішає увесь прогін. Кнопка звіту —
                 # лише в живому вікні.
                 QMessageBox.warning(
                     self, "DupScan",

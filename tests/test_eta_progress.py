@@ -161,7 +161,7 @@ def test_unknown_total_shows_only_done_without_estimate():
     for done in (0, 5120, 9000, 15000):
         clock.tick(1.0)
         texts.append(eta.render("Обхід тек", done, 0))
-    assert texts[0] == "Обхід тек"  # done=0 -- гола фаза, як і раніше
+    assert texts[0] == "Обхід тек"  # done=0 -- гола фаза, без числа
     assert texts[1] == "Обхід тек: 5120"
     assert texts[-1] == "Обхід тек: 15000"
     assert all("лишилось" not in t for t in texts)

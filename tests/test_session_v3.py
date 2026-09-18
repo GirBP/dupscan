@@ -1,7 +1,7 @@
-"""S3 «Solid Core»: сесія v3 без похідних розділів.
+"""Сесія v3 без похідних розділів.
 
 class_paths відновлюється з file_class+class_size, dir_files — з
-dir_ok+file_meta. Старі сесії v1/v2 читаються як раніше.
+dir_ok+file_meta. Старі сесії v1/v2 читаються без змін.
 """
 
 import gzip

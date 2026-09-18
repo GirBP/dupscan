@@ -1,11 +1,11 @@
-"""Хотфікс 3: гейт пари (directory_tree_mergeable) не має відмовляти на
-навмисних виключеннях (EXCLUDE_NAMES-теки типу __pycache__/.git), лише на
-СПРАВЖНІХ збоях читання (dir_read_failed).
+"""Гейт пари (directory_tree_mergeable) не має відмовляти на навмисних
+виключеннях (EXCLUDE_NAMES-теки типу __pycache__/.git), лише на
+справжніх збоях читання (dir_read_failed).
 
 Симптом власника: злиття двох тек на BARRACUDA відмовляло діалогом «Не всі
 елементи у вибраних теках вдалося прочитати…», бо службова тека __pycache__
-у B ставила dir_ok[батька]=False БЕЗ жодного справжнього збою, а гейт пари
-(directory_tree_complete) вимагав dir_ok is True для УСЬОГО піддерева.
+у B ставила dir_ok[батька]=False без жодного справжнього збою, а гейт пари
+(directory_tree_complete) вимагав dir_ok is True для всього піддерева.
 """
 
 import os
@@ -124,8 +124,8 @@ def test_old_v3_session_without_dir_read_failed_section_loads(tmp_path):
         result, [str(dir_a), str(dir_b)], base_dir=str(tmp_path / "data"))
     assert saved
 
-    # Емулюємо стару сесію v3, записану до цього хотфіксу: прибираємо
-    # розділ dir_read_failed з payload вручну (лишається валідний v3 JSON).
+    # Емулюємо стару сесію v3 без розділу dir_read_failed: прибираємо
+    # його з payload вручну (лишається валідний v3 JSON).
     import gzip
     import json
 

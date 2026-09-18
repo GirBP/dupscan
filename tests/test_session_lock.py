@@ -184,11 +184,10 @@ def test_b2_compact_store_does_not_interleave_with_concurrent_save(
     _run_b2_once(tmp_path_factory)
 
 
-# ================================ B3 ========================================
-# Мікроблок H: координатор підтвердив читанням коду, що import_session
-# (session.py) кличе _prune_old БЕЗ _locked — той самий вразливий патерн,
-# що save_session мав до Блоку B, ТЗ дослівно назвав лише save_session/
-# compact_store. B3 — та сама гонитва, тепер import_session || save_session.
+# ---- import_session || save_session: гонитва без _locked -------------------
+# import_session (session.py) кличе _prune_old без _locked — той самий
+# вразливий патерн гонитви, що й save_session. Тест ганяє import_session
+# паралельно з save_session, перевіряючи саме цю гонитву.
 
 
 def _run_b3_once(tmp_path_factory) -> None:

@@ -1,28 +1,19 @@
-"""Додатковий дефект, знайдений через E2E-двійника (Хотфікс 3): злиття
-подібних тек було зламане для БУДЬ-ЯКОГО symlink у джерелі, в обох
-режимах.
+"""Злиття подібних тек: перевірка і перенос symlink-ів у джерелі, в обох
+режимах (move/copy).
 
-merge_plan() кладе symlink-и в окрему "symlinks" категорію (size=0), але
-і MergePreparationWorker.run(), і fsops._transfer_files() безумовно
-викликали core.verify_current_file() для КОЖНОГО запису плану.
-verify_current_file() читає ВМІСТ через open(path) — для symlink-шляху це
-йде за посиланням і хешує ЦІЛЬОВИЙ файл, а звіряє прочитане з
+merge_plan() кладе symlink-и в окрему "symlinks" категорію (size=0).
+core.verify_current_file() читає ВМІСТ через open(path) — для symlink-шляху
+це йде за посиланням і хешує ЦІЛЬОВИЙ файл, а звіряє прочитане з
 lstat-розміром самого лінка (довжина тексту цілі, майже завжди інша за
-розмір цілі) — гарантована невідповідність, ESTALE.
+розмір цілі) — гарантована невідповідність, ESTALE. Тому
+MergePreparationWorker.run() і fsops._transfer_files() гілкують на
+os.path.islink(src): для symlink кличуть core.verify_current_symlink()
+(digest, stat за ТЕКСТОМ цілі — той самий контракт, що й у
+core.snapshot_directory()), а не verify_current_file().
 
-У move-гілці _transfer_files був ДРУГИЙ, окремий дефект: гейт
-безпосередньо перед публікацією безумовно вимагав stat_mod.S_ISREG
-поточного джерела, що валило б навіть symlink, який пройшов би
-виправлений verify-крок.
-
-core.snapshot_directory() (Merkle-доказ перед Кошиком цілої теки) вже
-робить це правильно — окремо гілкує на stat_mod.S_ISLNK і хешує ТЕКСТ
-цілі, а не вміст. Фікс: core.verify_current_symlink() дає той самий
-контракт (digest, stat) для окремого symlink-запису плану переносу, і
-обидва місця (workers.MergePreparationWorker, fsops._transfer_files)
-тепер гілкують на os.path.islink(src) перед вибором способу перевірки;
-move-гейт типу поточного джерела теж звіряє з ОЧІКУВАНИМ типом
-(symlink лишається symlink, а не завжди S_ISREG).
+У move-гілці _transfer_files гейт типу поточного джерела перед
+публікацією звіряє з ОЧІКУВАНИМ типом: symlink лишається symlink, а не
+завжди вимагає S_ISREG.
 """
 
 import os

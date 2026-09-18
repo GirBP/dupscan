@@ -1,10 +1,10 @@
 """Вкладка «Кластери тек» у GUI.
 
-Не про алгоритм (те в tests/test_clusters.py) — про безпечне ДРОТУВАННЯ:
-4-та вкладка не ламає код, що раніше рахував рівно 3 (self.tabs.
-currentIndex() як індекс у (v_files, v_dirs, v_sim)) — саме такий IndexError
-ловився б лише при ресайзі вікна на новій вкладці, а не при простому
-запуску, тому окремий тест на це виправдано.
+Не про алгоритм (те в tests/test_clusters.py) — про безпечне дротування:
+self.tabs.currentIndex() індексує кортеж views у resizeEvent, тож 4-та
+вкладка мусить бути в цьому кортежі, а не лише в переліку вкладок —
+інакше IndexError. Такий збій ловиться лише при ресайзі вікна на новій
+вкладці, а не при простому запуску, тому окремий тест виправданий.
 """
 
 import os
@@ -54,15 +54,15 @@ def test_cluster_tab_populated_after_refresh(tmp_path):
 
 
 def test_switching_to_clusters_tab_and_resizing_does_not_crash(tmp_path):
-    """Регресія проти IndexError: раніше (v_files, v_dirs, v_sim)[currentIndex()]
-    падав на індексі 3."""
+    """Регресія проти IndexError: (v_files, v_dirs, v_sim)[currentIndex()]
+    без явного branching за типом вкладки падає на індексі 3."""
     main, _result = _main_with_cluster(tmp_path)
     main.tabs.setCurrentIndex(3)
     _qapp.processEvents()
     resize = QResizeEvent(QSize(900, 700), QSize(800, 600))
     QApplication.sendEvent(main, resize)
     _qapp.processEvents()
-    main._update_selection_summary()  # раніше плутав кластери з подібністю
+    main._update_selection_summary()  # застереження: кластери не плутаються з подібністю
 
 
 def test_clusters_tab_selection_disables_trash_actions(tmp_path):

@@ -1,6 +1,6 @@
 """Автопараноя за файловою системою.
 
-2.16 увів metadata-shortcut перед Кошиком: доказ full + незмінні метадані
+metadata-shortcut перед Кошиком: доказ full + незмінні метадані
 -> без перечитування (DUPSCAN_PARANOID=1 і далі повертає повне читання
 вручну). На exFAT mtime має крок 10 мс, а ctime несправжній — підміна
 вмісту з тим самим розміром у цьому вікні непомітна для identity, тобто
@@ -135,7 +135,7 @@ def test_exfat_metadata_shortcut_forced_to_full_read(monkeypatch):
         unmount(mount_point)
 
 
-# ---- (в) на APFS (tmp_path): shortcut як у 2.16, без повного читання ------
+# ---- (в) на APFS (tmp_path): metadata-shortcut без повного читання -------
 
 
 def test_apfs_metadata_shortcut_still_reads_zero_bytes(tmp_path, monkeypatch):

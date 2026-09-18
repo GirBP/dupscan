@@ -20,7 +20,7 @@ pytestmark = pytest.mark.skipif(
 
 
 # ExFAT — файлова система зовнішнього диска власника (BARRACUDA) і єдина тут
-# без жорстких посилань; саме на ній ламалося злиття (хотфікс 4).
+# без жорстких посилань — злиття на ній вимагає фолбека `_publish_no_overwrite`.
 @pytest.mark.parametrize("fs", ["APFS", "Case-sensitive APFS", "HFS+", "ExFAT"])
 def test_duplicates_found_on_fs(fs):
     _img, mnt = mount_image(fs)

@@ -3,10 +3,10 @@
 Read-only поверхня над тими самими помилками, що вже показує
 ProblemsDialog/product.classify_problem — не про алгоритм класифікації
 (те в tests/test_product.py), а про: (1) чисту модель ProblemsModel
-(групування/порядок/обрізка) і (2) безпечне ДРОТУВАННЯ 6-ї вкладки —
-структурний read-only інваріант (як Блоки K/P — ClusterModel/
-PerceptualModel) і регресія проти IndexError у кортежах, що раніше
-рахували рівно 5 елементів (порт кластерів/фото вже наступав на це).
+(групування/порядок/обрізка) і (2) безпечне дротування 6-ї вкладки —
+структурний read-only інваріант, як у ClusterModel/PerceptualModel, і
+регресія проти IndexError у кортежах, які мають враховувати кожну
+вкладку (порт кластерів/фото вже наступав на це).
 """
 
 import os
@@ -185,7 +185,7 @@ def test_switching_to_problems_tab_and_resizing_does_not_crash():
     resize = QResizeEvent(QSize(900, 700), QSize(800, 600))
     QApplication.sendEvent(main, resize)
     _qapp.processEvents()
-    main._update_selection_summary()  # раніше плутав категорії з подібністю
+    main._update_selection_summary()  # застереження: категорії не плутаються з подібністю
 
 
 def test_switching_to_problems_tab_and_show_task_results_does_not_crash():

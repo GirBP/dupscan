@@ -392,10 +392,9 @@ class GroupModel(QAbstractItemModel):
             return self.createIndex(row, col, 0)
         if parent.internalId() != 0:
             return QModelIndex()
-        # Один виклик root_id замість двох — раніше перевірка
-        # "is None" і фактичне використання кликали root_id() окремо, тож
-        # mypy бачив другий виклик як незалежний int | None (детермінований
-        # метод — рантайм-різниці не було, лише зайвий виклик).
+        # Один виклик root_id замість двох: якщо перевірку "is None" і
+        # використання рознести на два виклики, mypy бачить другий як
+        # незалежний int | None, хоч метод детермінований.
         gi = self.root_id(parent.row())
         if gi is None:
             return QModelIndex()
@@ -595,10 +594,10 @@ class GroupModel(QAbstractItemModel):
         if wants_checked == is_checked:
             return True
         if wants_checked:
-            # Тека-еталон (2.23.0): позначка на захищеному
-            # шляху не ставиться взагалі — перший шар до пайплайна і
-            # to_trash-рубежа. Хук інжектиться застосунком: модель не
-            # залежить від preferences (як warn).
+            # Тека-еталон: позначка на захищеному шляху не ставиться
+            # взагалі — перший шар до пайплайна і to_trash-рубежа. Хук
+            # інжектиться застосунком: модель не залежить від preferences
+            # (як warn).
             checker = getattr(self, "protected_checker", None)
             if checker is not None and checker(p):
                 self.warn(

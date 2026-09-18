@@ -60,9 +60,10 @@ def test_app_hooks_prefer_app_module_under_pytest():
 
 def test_directory_trash_worker_run_under_frozen_entry(tmp_path, monkeypatch):
     """DirectoryTrashWorker кличе _verify_then_trash_dir через _app_hooks()
-    пізнім lookup-ом — саме цей шлях ламався KeyError 'app' у 2.17.0
-    до першого хотфіксу. Прогін через РЕАЛЬНИЙ клас воркера, не лише через
-    ізольований _app_hooks()."""
+    пізнім lookup-ом — цей шлях мусить пережити відсутність
+    dupscan.ui.app у sys.modules (frozen-точка входу, коли app.py
+    виконується як __main__; див. _app_hooks). Тест прогоняє реальний
+    клас воркера, не лише ізольований _app_hooks()."""
     monkeypatch.delitem(sys.modules, "dupscan.ui.app")
     monkeypatch.setitem(sys.modules, "__main__", app_mod)
 

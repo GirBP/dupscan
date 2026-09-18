@@ -99,7 +99,7 @@ def test_copy_accepts_uncovered_with_fresh_digest(tmp_path):
 
 
 def test_raw_copy_without_digests_still_rejects_unproven(tmp_path):
-    """Прямий _copy_files БЕЗ карти digest-ів лишається суворим (2.16)."""
+    """Прямий _copy_files БЕЗ карти digest-ів лишається суворим."""
     r, src, dst = _owner_case(tmp_path)
     plan, _total = core.merge_plan(r, src, dst)
     _copied, errors = app_mod._copy_files(r, plan, dst, src)

@@ -1,8 +1,7 @@
 """QThread-воркери DupScan: скан, рескан сесії, перевірка пари, злиття,
 Кошик теки, завантаження сесії, перерахунок, разова фонова робота.
 
-Винесено з app.py (2.17 «Solid Core») БЕЗ зміни поведінки, разом із
-чистими помічниками рескану сесії (containing_session_root,
+Разом із чистими помічниками рескану сесії (containing_session_root,
 rebase_session_path, _iter_session_refresh_cache_rows,
 build_session_refresh_cache_rows, _session_refresh_stats, _dir_dates_for),
 які не торкаються GUI. Диск — тільки тут, ніколи в GUI-потоці.
@@ -520,9 +519,8 @@ class MergePreparationWorker(QThread):
                 # merge_plan свідомо кладе такі файли в план (uncovered —
                 # «усе без доказу мусить переїхати»), а доказом для них є
                 # свіже повне читання нижче (verify_current_file без
-                # очікуваних метаданих). Раніше тут був вибух «немає
-                # метаданих файла», що ламав злиття будь-якої теки зі
-                # службовим сміттям.
+                # очікуваних метаданих) — без нього злиття будь-якої теки
+                # зі службовим сміттям валиться з «немає метаданих файла».
 
                 def file_progress(read_bytes: int, _file_total: int) -> None:
                     nonlocal last_progress
@@ -542,8 +540,8 @@ class MergePreparationWorker(QThread):
 
                 if os.path.islink(source):
                     # symlink: немає вмісту для BLAKE3 (verify_current_file
-                    # безумовно йде за посиланням і хешує ЦІЛЬОВИЙ файл —
-                    # E2E-хотфікс 3, core.verify_current_symlink).
+                    # безумовно йде за посиланням і хешує цільовий файл —
+                    # див. core.verify_current_symlink).
                     digest, _current = core.verify_current_symlink(source)
                 else:
                     digest, _current = core.verify_current_file(
